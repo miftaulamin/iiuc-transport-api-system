@@ -1,22 +1,24 @@
 package com.iiuc.transportapisystem.services;
 
 import com.iiuc.transportapisystem.model.Model;
-import com.springframework.stereotype.Service;
+import org.springframework.stereotype.Service;
 import java.util.*;
 
-@service
-public class Services{
+@Service
+public class Services {
+
     private List<Model> transports = new ArrayList<>();
     private Long nextid = 1L;
 
     // Read(all)
-    private list<Model> getAllTransports(){
+    public List<Model> getAllTransports() {
         return transports;
     }
+
     // Read(specific)
-    private Model getSpecificTransport(Long id){
-        for(Model transport: transports){
-            if(transport.getId().equals(id)){
+    public Model getSpecificTransport(Long id) {
+        for (Model transport : transports) {
+            if (transport.getId().equals(id)) {
                 return transport;
             }
         }
@@ -24,16 +26,16 @@ public class Services{
     }
 
     // Create
-    private Model createTransport(Model transport){
+    public Model createTransport(Model transport) {
         transport.setId(nextid++);
         transports.add(transport);
         return transport;
     }
 
     // Update
-    private Model updateTransport(Long id, Model newtransport){
-        for(Model transport: transports){
-            if(transport.getId().equals(id)){
+    public Model updateTransport(Long id, Model newtransport) {
+        for (Model transport : transports) {
+            if (transport.getId().equals(id)) {
                 transport.setBus_number(newtransport.getBus_number());
                 transport.setRoute_name(newtransport.getRoute_name());
                 transport.setDriver_name(newtransport.getDriver_name());
@@ -48,9 +50,9 @@ public class Services{
     }
 
     // Delete
-    private Boolean deleteTransport(Long id){
-        for(Model transport: transports){
-            if(transport.getId().equals(id)){
+    public Boolean deleteTransport(Long id) {
+        for (Model transport : transports) {
+            if (transport.getId().equals(id)) {
                 return transports.remove(transport);
             }
         }
