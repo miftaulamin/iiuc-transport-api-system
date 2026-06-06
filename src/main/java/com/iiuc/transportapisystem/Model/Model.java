@@ -9,6 +9,8 @@ public class Model {
     private int capacity;
     private String departureTime;
     private String arrivalTime;
+    public Model(){
+    }
 
     public Model(int id, String busNumber, String routeName,
                  String driverName, int capacity,
