@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IIUC Transport &mdash; Departure Board</title>
+<link rel="icon" href="data:," />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="stripe" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">IIUC</span>
+    <div class="brand-text">
+      <h1>Transport Board</h1>
+      <p>Campus bus directory &amp; control</p>
+    </div>
+  </div>
+  <div class="clock" id="clock">--:--:--</div>
+</header>
+
+<main class="board-wrap">
+
+  <section class="stats" id="stats" aria-label="Fleet summary">
+    <div class="stat">
+      <span class="stat-num" id="statBuses">0</span>
+      <span class="stat-label">Buses</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="statRoutes">0</span>
+      <span class="stat-label">Routes</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="statCapacity">0</span>
+      <span class="stat-label">Total seats</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num" id="statSemesters">0</span>
+      <span class="stat-label">Semesters</span>
+    </div>
+  </section>
+
+  <section class="toolbar">
+    <div class="search-field">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M11 11L14.5 14.5M12.6667 7.33333C12.6667 10.2789 10.2789 12.6667 7.33333 12.6667C4.38781 12.6667 2 10.2789 2 7.33333C2 4.38781 4.38781 2 7.33333 2C10.2789 2 12.6667 4.38781 12.6667 7.33333Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <input type="text" id="searchInput" placeholder="Search bus number, route, or driver" />
+    </div>
+    <select id="semesterFilter">
+      <option value="">All semesters</option>
+    </select>
+    <button class="btn-primary" id="newBusBtn">+ New bus</button>
+  </section>
+
+  <section class="board" id="boardSection">
+    <div class="board-head" role="row">
+      <span class="col-line">Line</span>
+      <span class="col-bus">Bus no.</span>
+      <span class="col-route">Route</span>
+      <span class="col-driver">Driver</span>
+      <span class="col-cap">Seats</span>
+      <span class="col-dep">Departs</span>
+      <span class="col-arr">Arrives</span>
+      <span class="col-sem">Semester</span>
+      <span class="col-actions" aria-hidden="true"></span>
+    </div>
+    <div class="board-body" id="boardBody">
+      <!-- rows injected here -->
+    </div>
+    <div class="empty-state" id="emptyState" hidden>
+      <div class="empty-badge">∅</div>
+      <h3>No buses on the board</h3>
+      <p>Add the first bus to start filling the schedule.</p>
+      <button class="btn-primary" id="emptyNewBusBtn">+ New bus</button>
+    </div>
+    <div class="loading-state" id="loadingState">
+      <span class="flap">Loading fleet data&hellip;</span>
+    </div>
+    <div class="error-state" id="errorState" hidden>
+      <h3>Couldn't reach the API</h3>
+      <p id="errorDetail">The board can't load without the backend running.</p>
+      <button class="btn-secondary" id="retryBtn">Retry</button>
+    </div>
+  </section>
+</main>
+
+<!-- Slide-over form panel -->
+<div class="scrim" id="scrim" hidden></div>
+<aside class="panel" id="panel" hidden aria-hidden="true">
+  <form id="busForm" novalidate>
+    <div class="panel-head">
+      <h2 id="panelTitle">New bus</h2>
+      <button type="button" class="icon-btn" id="closePanel" aria-label="Close">&times;</button>
+    </div>
+
+    <input type="hidden" id="busId" />
+
+    <label class="field">
+      <span>Bus number</span>
+      <input type="text" id="busNumber" required placeholder="e.g. IIUC-07" />
+    </label>
+
+    <label class="field">
+      <span>Route name</span>
+      <input type="text" id="routeName" required placeholder="e.g. GEC &ndash; Bhatiary" />
+    </label>
+
+    <label class="field">
+      <span>Driver name</span>
+      <input type="text" id="driverName" required placeholder="e.g. Md. Kamal Hossain" />
+    </label>
+
+    <div class="field-row">
+      <label class="field">
+        <span>Capacity</span>
+        <input type="number" id="capacity" min="1" required placeholder="52" />
+      </label>
+      <label class="field">
+        <span>Semester</span>
+        <input type="text" id="semester" required placeholder="Summer 2026" />
+      </label>
+    </div>
+
+    <div class="field-row">
+      <label class="field">
+        <span>Departure time</span>
+        <input type="text" id="departureTime" required placeholder="07:30 AM" />
+      </label>
+      <label class="field">
+        <span>Arrival time</span>
+        <input type="text" id="arrivalTime" required placeholder="08:15 AM" />
+      </label>
+    </div>
+
+    <p class="form-error" id="formError" hidden></p>
+
+    <div class="panel-actions">
+      <button type="button" class="btn-secondary" id="cancelPanel">Cancel</button>
+      <button type="submit" class="btn-primary" id="saveBtn">Save bus</button>
+    </div>
+  </form>
+</aside>
+
+<!-- Delete confirm -->
+<div class="scrim" id="confirmScrim" hidden></div>
+<div class="confirm" id="confirmDialog" hidden role="alertdialog" aria-modal="true">
+  <h3>Remove this bus?</h3>
+  <p id="confirmText">This will delete the entry from the board.</p>
+  <div class="panel-actions">
+    <button class="btn-secondary" id="confirmCancel">Keep it</button>
+    <button class="btn-danger" id="confirmDelete">Delete</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
